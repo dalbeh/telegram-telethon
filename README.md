@@ -3,11 +3,11 @@ This is a simple class maded for personal use that allows get messages and users
 <br />
 # How-To
 1. On AWS, go to Secrets Manager and create a secret named `telegram/credentials` with the following structure< br />
-`{
+`{<br />
     "api_id": "11570168",
     "api_hash": "6a05ac257b23b7b8363531d1e7f0e24a",
     "phone": "+393519441796",
-    "username": "Agus De"
+    "username": "Agus De" <br />
 }`
 
 2. Import file from Github and asyncio <br />
