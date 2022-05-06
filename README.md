@@ -2,7 +2,7 @@
 This is a simple class maded for personal use that allows get messages and users from a telegram group. Principally i used Telethon, Boto3, Pandas and PyArrow.  The telegram credentials are getted from AWS Secrets Manager `telegram/credentials` and the results are stored in s3 buckets for default.
 <br />
 # How-To
-1. On AWS, go to Secrets Manager and create a secret named `telegram/credentials` with the following structure filling it with your data < br />
+1. On AWS, go to Secrets Manager and create a secret named `telegram/credentials` with the following structure filling it with your data <br />
 `{
     "api_id": "",
     "api_hash": "",
