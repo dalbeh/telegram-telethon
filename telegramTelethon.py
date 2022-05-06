@@ -32,7 +32,6 @@ class telegramBot:
         self.today_date = time.strftime('%d/%m/%y', time.localtime())
         self.s3bucket = s3bucket
 
-        
 
     def getCredentials(self):
         """
@@ -70,7 +69,7 @@ class telegramBot:
         return client
 
 
-    async def getMessages(self,client,group,total_messages, daily):
+    async def getMessages(self,client,group:str,total_messages:int, daily:bool):
         """
         It downloads the messages from a group, filters them by date and by bots, and returns a
         dataframe with the messages
@@ -166,8 +165,125 @@ class telegramBot:
         return self.toParquetAndS3(df,name)
 
 
-   
-    async def getParticipants(self,client,group,total_users,type):
+    async def getMessagesFromDays(self,client,group:str,total_messages:int,date_from:str,date_to:str):
+        """
+        It downloads the messages from a group in a given date range, filters them by date and by bots, and returns a
+        dataframe with the messages
+
+        :param client: The client object that you created in the previous step
+        :param group: The group ID or username
+        :type group: str
+        :param total_messages: The total number of messages per date.
+        :type total_messages: int
+        :param date_from: The date from which you want to start downloading messages
+        :type date_from: str
+        :param date_to: The date to downloading messages from
+        :type date_to: str
+        :return: A list of messages from a group
+        """
+        
+        
+        # date_from, date_to example: 01/12/22 > DD/MM/YY
+            
+        date_from_start = date_from +' 00:00:00' 
+        date_from_start = datetime.datetime.strptime(date_from_start, '%d/%m/%y %H:%M:%S')
+        date_to_start = date_to +' 00:00:00' 
+        date_to_start = datetime.datetime.strptime(date_to_start, '%d/%m/%y %H:%M:%S')
+
+        days = (date_to_start - date_from_start).days+1
+
+        datelist = pd.date_range(date_from_start, periods=days).tolist()
+        
+        
+
+        if group.isdigit():
+            entity = PeerChannel(int(group))
+        else:
+            entity = group
+
+
+        my_channel = await client.get_entity(entity)
+
+
+
+
+        # Get Bot UserId From Yesterday
+        yesterday_date = time.strftime('%d/%m/%y', (datetime.date.today() - datetime.timedelta(1)).timetuple()).replace('/', '-')
+        s3 = s3fs.S3FileSystem()
+        df_bots = pq.ParquetDataset(f's3://raw-data-extracted/telegram/users_bot_{yesterday_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
+        bots_id = list(df_bots['id'])
+        
+
+        print('Downloading Messages ' + group)
+        df = pd.DataFrame(columns=['message', 'user_id', 'date_message', 'group'])
+
+        for _date in datelist:
+        
+            date_start = _date
+            # print(datetime.datetime.utctimetuple((date_start)))
+            date_start_unix = datetime.datetime.timestamp(date_start)*1000
+            date_start_text = time.strftime('%d/%m/%y', datetime.datetime.utctimetuple((date_start)) ).replace('/', '-')
+
+
+            date_end_offset = _date + datetime.timedelta(hours=23.999999999)
+            date_end_offset_unix = datetime.datetime.timestamp(date_end_offset)*1000
+
+
+
+
+            offset = 0
+            i = 1
+            download = True
+            while download == True:
+
+                history = await client(GetHistoryRequest(
+                        peer=my_channel,
+                        offset_id=0,
+                        offset_date=date_end_offset,              
+                        add_offset=offset,
+                        limit=500,
+                        max_id=0,
+                        min_id=0,
+                        hash=0
+                    ))
+
+                messages = history.messages
+                for message in messages:
+                    try:
+                        message_dict=message.to_dict()
+                        
+                    
+                        from_id = message_dict['from_id']
+                        user_id = str(from_id['user_id'])
+                        date_message = message_dict['date']
+                        date_message_unix = datetime.datetime.timestamp(message_dict['date'])*1000
+
+            
+                        if (date_message_unix >= date_start_unix) and int(user_id) not in bots_id and len(str(message_dict['message'])) > 2 and str(message_dict['message'])[:1] != '/':
+                            df_lenght = len(df) 
+                            df.loc[df_lenght]=[message_dict['message'], user_id, date_message, group]
+                        elif date_message_unix < date_start_unix:
+                            gettingOtherDay = True
+                        
+                        
+                    except: 
+                        pass
+                
+                offset = offset + 500
+                print(str(round(((offset/total_messages))*100,2))+'%', end= '\r')
+                if offset >= total_messages or gettingOtherDay:
+                    download = False
+
+
+            group_name = group.split('/')[3].lower()
+            name = f'messages_{date_start_text}_{group_name}'
+            self.toParquetAndS3(df,name)
+            # self.toCSVAndS3(df,name)
+
+        return print('Done')
+
+
+    async def getParticipants(self,client,group,total_users:int,type:str):
         """
         It downloads all the users from a group, and returns a dataframe with the following columns: id,
         first_name, last_name, username, phone, group
@@ -275,6 +391,7 @@ class telegramBot:
         s3_url = f's3://{self.s3bucket}/telegram/{name}.parquet.gzip'
         df.to_parquet(s3_url, compression='gzip')
         return print('Uploaded to ' + s3_url)
+
 
     def toCSVAndS3(self,df,name):
         """
