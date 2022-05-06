@@ -10,8 +10,10 @@ This is a simple class maded for personal use that allows to get messages and us
     "username": ""
 }`
 
-2. Import file from Github and asyncio <br />
-`import git@github.com:dalbeh/telegram-telethon.git as telegramTelethon` <br />
+2. Import file from Github using httpimport and asyncio <br />
+`import httpimport` <br />
+`with httpimport.github_repo('dalbeh', 'telegram-telethon', branch = 'main'):` <br />
+    `import telegramTelethon` <br />
 `import asyncio`
 
 2. Create class instance <br />
