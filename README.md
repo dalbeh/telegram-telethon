@@ -13,10 +13,12 @@ This is a simple class maded for personal use that allows to get messages and us
 ```
 
 2. Import file from Github using httpimport and asyncio <br />
-```import httpimport
+```
+import httpimport
 with httpimport.github_repo('dalbeh', 'telegram-telethon', branch = 'main'):
     import telegramTelethon
-import asyncio```
+import asyncio
+```
 
 2. Create class instance <br />
 `telegram = telegramTelethon.telegramBot(s3bucket)`
