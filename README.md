@@ -17,7 +17,7 @@ This is a simple class maded for personal use that allows to get messages and us
 `import asyncio`
 
 2. Create class instance <br />
-`telegram = telegramTelethon.telegramBot()`
+`telegram = telegramTelethon.telegramBot(s3bucket)`
 3. Create async loop <br />
 `loop = asyncio.get_event_loop()`
 
