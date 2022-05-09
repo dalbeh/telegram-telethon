@@ -15,7 +15,7 @@ This is a simple class maded for personal use that allows to get messages and us
 2. Import file from Github using httpimport and asyncio <br />
 ```
 import httpimport
-with httpimport.github_repo('dalbeh', 'telegram-telethon', branch = 'main'):
+with httpimport.github_repo('dalbeh', 'telegram-telethon', 'telegramTelethon', branch='main'):
     import telegramTelethon
 import asyncio
 ```
