@@ -28,6 +28,8 @@ import asyncio
 5. Call connect() method and get the client object <br />
 `client = loop.run_until_complete(telegram.connect())`
 
-7. Call getMessages() or getParticipants() methods <br />
-`loop.run_until_complete(telegram.getParticipants(client, group, limit, type))` <br />
-`loop.run_until_complete(telegram.getMessages(client, group, limit, daily))`
+7. Call getMessages(), getMessagesFromDays() or getParticipants() methods <br />
+`loop.run_until_complete(telegram.getMessages(client, group, limit, daily))` <br />
+`loop.run_until_complete(telegramClient.getMessagesFromDays(client, group, limit, date_from, date_to))` <br />
+`loop.run_until_complete(telegram.getParticipants(client, group, limit, type))`
+
