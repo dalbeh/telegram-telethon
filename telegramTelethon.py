@@ -396,11 +396,11 @@ class telegramBot:
             print("Trying to get today's bot id list")
             today_date = time.strftime('%d/%m/%y', (datetime.date.today()).timetuple()).replace('/', '-')
             s3 = s3fs.S3FileSystem()
-            df_bots = pq.ParquetDataset(f's3://raw-data-extracted/users_bot_{today_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
+            df_bots = pq.ParquetDataset(f's3://raw-data-extracted/telegram/users_bot_{today_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
             return list(df_bots['id'])
         except:
             print("Trying to get yesterday's bot id list")
             yesterday_date = time.strftime('%d/%m/%y', (datetime.date.today() - datetime.timedelta(1)).timetuple()).replace('/', '-')
             s3 = s3fs.S3FileSystem()
-            df_bots = pq.ParquetDataset(f's3://raw-data-extracted/users_bot_{yesterday_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
+            df_bots = pq.ParquetDataset(f's3://raw-data-extracted/telegram/users_bot_{yesterday_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
             return list(df_bots['id'])
