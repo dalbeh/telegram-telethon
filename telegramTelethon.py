@@ -99,7 +99,7 @@ class telegramBot:
         today_date_end = self.today_date +' 23:59:59' 
         today_date_end = datetime.datetime.strptime(today_date_end, '%d/%m/%y %H:%M:%S')
 
-        print('Downloading Messages ' + group)
+        print('Downloading Messages ' + group + ' from today')
         df = pd.DataFrame(columns=['message', 'user_id', 'date_message', 'group'])
         gettingOtherDay = False
         offset = 0
@@ -196,7 +196,7 @@ class telegramBot:
         bots_id = self.getBotList()        
 
 
-        print('Downloading Messages ' + group)
+        print('Downloading Messages ' + group + ' from ' + date_from + ' to ' + date_to)
         df = pd.DataFrame(columns=['message', 'user_id', 'date_message', 'group'])
 
         for _date in datelist:
