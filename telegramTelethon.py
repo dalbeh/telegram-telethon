@@ -249,10 +249,10 @@ class telegramBot:
                     except: 
                         pass
                 
-            offset = offset + 500
-            print(str(round(((offset/total_messages))*100,2))+'%', end= '\r')
-            if offset >= total_messages or gettingOtherDay:
-                download = False
+                offset = offset + 500
+                # print(str(round(((offset/total_messages))*100,2))+'%', end= '\r')
+                if offset >= total_messages or gettingOtherDay:
+                    download = False
 
 
             group_name = group.split('/')[3].lower()
