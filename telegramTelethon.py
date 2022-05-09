@@ -90,18 +90,8 @@ class telegramBot:
 
         my_channel = await client.get_entity(entity)
 
-
-
-
-        # Get Bot UserId From Yesterday
-        yesterday_date = time.strftime('%d/%m/%y', (datetime.date.today() - datetime.timedelta(1)).timetuple()).replace('/', '-')
-        s3 = s3fs.S3FileSystem()
-        df_bots = pq.ParquetDataset(f's3://raw-data-extracted/users_bot_{yesterday_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
-        bots_id = list(df_bots['id'])
-        
+        bots_id = self.getBotList()        
     
-        # today_date = time.strftime('%d/%m/%y', time.localtime())
-
         today_date_start = self.today_date +' 00:00:00'
         today_date_start = datetime.datetime.strptime(today_date_start, '%d/%m/%y %H:%M:%S')
         today_date_start_unix = datetime.datetime.timestamp(today_date_start)*1000
@@ -194,7 +184,6 @@ class telegramBot:
 
         datelist = pd.date_range(date_from_start, periods=days).tolist()
         
-        
 
         if group.isdigit():
             entity = PeerChannel(int(group))
@@ -204,15 +193,8 @@ class telegramBot:
 
         my_channel = await client.get_entity(entity)
 
+        bots_id = self.getBotList()        
 
-
-
-        # Get Bot UserId From Yesterday
-        yesterday_date = time.strftime('%d/%m/%y', (datetime.date.today() - datetime.timedelta(1)).timetuple()).replace('/', '-')
-        s3 = s3fs.S3FileSystem()
-        df_bots = pq.ParquetDataset(f's3://raw-data-extracted/telegram/users_bot_{yesterday_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
-        bots_id = list(df_bots['id'])
-        
 
         print('Downloading Messages ' + group)
         df = pd.DataFrame(columns=['message', 'user_id', 'date_message', 'group'])
@@ -227,8 +209,6 @@ class telegramBot:
 
             date_end_offset = _date + datetime.timedelta(hours=23.999999999)
             date_end_offset_unix = datetime.datetime.timestamp(date_end_offset)*1000
-
-
 
 
             offset = 0
@@ -404,3 +384,23 @@ class telegramBot:
         s3_url = f's3://{self.s3bucket}/telegram/{name}.csv'
         df.to_csv(s3_url, index=False)
         return print('Uploaded to ' + s3_url)
+
+
+    def getBotList(self):
+        """
+        It tries to get the bot list from today's date, if it fails, it tries to get the bot list from
+        yesterday's date
+        :return: A list of bot user ids
+        """
+        try:
+            print("Trying to get today's bot id list")
+            today_date = time.strftime('%d/%m/%y', (datetime.date.today()).timetuple()).replace('/', '-')
+            s3 = s3fs.S3FileSystem()
+            df_bots = pq.ParquetDataset(f's3://raw-data-extracted/users_bot_{today_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
+            return list(df_bots['id'])
+        except:
+            print("Trying to get yesterday's bot id list")
+            yesterday_date = time.strftime('%d/%m/%y', (datetime.date.today() - datetime.timedelta(1)).timetuple()).replace('/', '-')
+            s3 = s3fs.S3FileSystem()
+            df_bots = pq.ParquetDataset(f's3://raw-data-extracted/users_bot_{yesterday_date}_walkwithsteptelegram.parquet.gzip', filesystem=s3).read_pandas().to_pandas()
+            return list(df_bots['id'])
